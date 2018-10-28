@@ -1,0 +1,17 @@
+EXTRACTION:
+    HOST: localhost
+    PORT: 3306
+    USER: root
+    PASS: juno
+    DB: test
+    ENGINE: mysql
+COMMIT:
+    HOST: localhost
+    PORT: 5432
+    USER: postgres
+    PASS: juno
+    ENGINE: postgres
+    DB: temp
+QUEUE:
+    ENGINE: REDIS
+    HOST: localhost
