@@ -1,16 +1,16 @@
 EXTRACTION:
+    ENGINE: mysql
     HOST: localhost
     PORT: 3306
     USER: root
-    PASS: juno
+    PASS: pass
     DB: test
-    ENGINE: mysql
 COMMIT:
+    ENGINE: postgres
     HOST: localhost
     PORT: 5432
     USER: postgres
-    PASS: juno
-    ENGINE: postgres
+    PASS: pass
     DB: temp
 QUEUE:
     ENGINE: REDIS
