@@ -104,5 +104,4 @@ venv.bak/
 .mypy_cache/
 bin/
 lib64
-sample/
 share/
