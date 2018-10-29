@@ -66,4 +66,5 @@ $ rq worker &
 4. Start Replication and Data Load (Use Supervisor if needed)
 ```sh
 $ python main.py &
-```sh
+```
+
