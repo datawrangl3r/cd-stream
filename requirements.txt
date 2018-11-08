@@ -28,3 +28,4 @@ rq-dashboard==0.3.12
 six==1.11.0
 Werkzeug==0.14.1
 wrapt==1.10.11
+mysql-replication
