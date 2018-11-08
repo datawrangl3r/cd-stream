@@ -27,7 +27,7 @@ class mysql_postgres:
 			self.stream = BinLogStreamReader(
 						connection_settings=self.mysql_settings,
 						server_id=1,
-						blocking=True, 
+						blocking=True,
 						resume_stream = True,
 						only_events = [DeleteRowsEvent, WriteRowsEvent, UpdateRowsEvent, QueryEvent],
 						log_pos = self.log_filepos,
@@ -53,14 +53,14 @@ class mysql_postgres:
 						table_name=binlogevent.table
 						event_time=binlogevent.timestamp
 						schema_row = binlogevent.schema
-				
+
 						if isinstance(binlogevent, DeleteRowsEvent):
 							self.queue.submit_job('delete', [commit_settings, table_name, row["values"]])
 						elif isinstance(binlogevent, WriteRowsEvent):
 							self.queue.submit_job('insert', [commit_settings, table_name, row["values"]])
 						elif isinstance(binlogevent, UpdateRowsEvent):
 							self.queue.submit_job('update', [commit_settings, table_name, row["before_values"], row["after_values"]])
-						
+
 		except Exception as e:
 			self.kill(self.log_filename, self.log_filepos)
 
