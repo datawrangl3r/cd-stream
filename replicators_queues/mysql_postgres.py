@@ -1,4 +1,6 @@
 import os
+import logging
+import re
 from replicators_queues.queues import Queues
 from pymysqlreplication import BinLogStreamReader
 from pymysqlreplication.event import QueryEvent, FormatDescriptionEvent, RotateEvent,XidEvent
@@ -6,7 +8,6 @@ from pymysqlreplication.row_event import DeleteRowsEvent, UpdateRowsEvent, Write
 
 class mysql_postgres:
 	def __init__(self, extraction_settings, commit_settings, queue_settings):
-		self.resume_file = '/tmp/stream.loc'
 
 		self.mysql_settings = {
 			"host": extraction_settings["HOST"],
@@ -17,12 +18,17 @@ class mysql_postgres:
 
 		self.queue = Queues(queue_settings)
 
-		if os.path.isfile(self.resume_file) == True:
-			self.log_filename, self.log_filepos = open('/tmp/stream.loc','r').read().split('~')
-			self.log_filepos = int(self.log_filepos)
-		else:
-			self.log_filename, self.log_filepos = None,None
+		self.resume_file = '/tmp/' + extraction_settings["DB"] + '.loc'
+		print (self.resume_file)
+		try:
+			if os.path.isfile(self.resume_file) == True:
+				self.log_filename, self.log_filepos = open(self.resume_file,'r').read().split('~')
+				self.log_filepos = int(self.log_filepos)
+			else:
+				self.log_filename, self.log_filepos = None,None
 
+		except Exception as e:
+			print (e)
 		try:
 			self.stream = BinLogStreamReader(
 						connection_settings=self.mysql_settings,
@@ -33,21 +39,48 @@ class mysql_postgres:
 						log_pos = self.log_filepos,
 						log_file = self.log_filename)
 
+
 			for binlogevent in self.stream:
-				self.log_filename, self.log_pos = [self.stream.log_file, self.stream.log_pos]
+				if(type(binlogevent.schema) == str and str(binlogevent.schema) == extraction_settings["DB"]) or str(str(binlogevent.schema)[2:]).replace("'",'') == extraction_settings["DB"]:
+					self.log_filename, self.log_filepos = [self.stream.log_file, self.stream.log_pos]
+					try:
+						if isinstance(binlogevent, QueryEvent) or binlogevent.event_type == 2:
+							print("Inside query event")
+							print(str(binlogevent.query))
+							query = str(re.sub('/\*(.*)\*/', '', str(binlogevent.query))).strip()
+							print(query)
+							func_name = str(query).split(' ')[0]
+							print(func_name)
+							if func_name in ['CREATE','create'] or func_name in ['ALTER','alter']:
+								query = str(binlogevent.query)
+								logging.info(query)
+								self.queue.submit_job(func_name, [commit_settings, query])
+							else:
+								logging.critical(query)
 
-				if isinstance(binlogevent, QueryEvent):
-					func_name = str(binlogevent.query).split(' ')[0].lower()
-					query = str(binlogevent.query)
+						elif isinstance(binlogevent, RotateEvent) == False and \
+							isinstance(binlogevent, FormatDescriptionEvent) == False and \
+							isinstance(binlogevent, TableMapEvent) == False and \
+							isinstance(binlogevent, XidEvent) == False:
 
-					if func_name in ['create'] or func_name in ['alter']:
-						self.queue.submit_job(func_name, [commit_settings, query])
+							for row in binlogevent.rows:
+								log_position=binlogevent.packet.log_pos
+								table_name=binlogevent.table
+								event_time=binlogevent.timestamp
+								schema_row = binlogevent.schema
 
-				elif isinstance(binlogevent, RotateEvent) == False and \
-						isinstance(binlogevent, FormatDescriptionEvent) == False and \
-						isinstance(binlogevent, TableMapEvent) == False and \
-						isinstance(binlogevent, XidEvent) == False:
-
+<<<<<<< HEAD
+								if isinstance(binlogevent, DeleteRowsEvent):
+									self.queue.submit_job('delete', [commit_settings, table_name, row["values"]])
+								elif isinstance(binlogevent, WriteRowsEvent):
+									self.queue.submit_job('insert', [commit_settings, table_name, row["values"]])
+								elif isinstance(binlogevent, UpdateRowsEvent):
+									self.queue.submit_job('update', [commit_settings, table_name, row["before_values"], row["after_values"]])
+						else:
+							print(binlogevent)
+					except Exception as e:
+						print(e)
+=======
 					for row in binlogevent.rows:
 						log_position=binlogevent.packet.log_pos
 						table_name=binlogevent.table
@@ -61,11 +94,15 @@ class mysql_postgres:
 						elif isinstance(binlogevent, UpdateRowsEvent):
 							self.queue.submit_job('update', [commit_settings, table_name, row["before_values"], row["after_values"]])
 
+>>>>>>> 941673cd6de7bd3120105c9ee0eae551d8989ac6
 		except Exception as e:
+			logging.critical(e)
+			self.kill(self.log_filename, self.log_filepos)
+		except KeyboardInterrupt:
 			self.kill(self.log_filename, self.log_filepos)
 
-
 	def kill(self, log_filename, log_filepos):
+		print (log_filename, log_filepos)
 		if log_filename != None and log_filepos != None:
 			write_resume_file = open(self.resume_file,'w')
 			write_resume_file.write('%s~%s'%(log_filename, log_filepos))

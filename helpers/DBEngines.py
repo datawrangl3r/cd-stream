@@ -50,11 +50,11 @@ class DBEngine:
 
 				try:
 					self.ext_db = mdb.connect(
-								host = self.extraction_settings["HOST"],
-								port = self.extraction_settings["PORT"],
-								user = self.extraction_settings["USER"],
-								passwd = self.extraction_settings["PASS"],
-								db = self.extraction_settings["DB"])
+							host = self.extraction_settings["HOST"],
+							port = self.extraction_settings["PORT"],
+							user = self.extraction_settings["USER"],
+							passwd = self.extraction_settings["PASS"],
+							db = self.extraction_settings["DB"])
 				except Exception as e:
 					logging.critical("Unable to connect to the Extract Database")
 
@@ -122,7 +122,8 @@ class DBEngine:
 					logging.critical("Unable to connect to the Redis Cache")
 
 		except Exception as e:
-			return {"status": "Failed", "message": "Oops, Something is not right!!", "error": str(e)}
+			logging.critical(e)
+#			return {"status": "Failed", "message": "Oops, Something is not right!!", "error": str(e)}
 
 	def test_connection(self):
 
@@ -143,6 +144,7 @@ class DBEngine:
 	def test_replication(self):
 		try:
 			instance = eval(self.extraction_settings["ENGINE"]+"_"+self.commit_settings["ENGINE"]+'(self.extraction_settings, self.commit_settings, self.queue_settings)')
+			print ('here2', instance)
 		except Exception as e:
 			return {"status": "Failed", "message": "Replication Initiation Failed", "error": str(e)}
 			logging.critical("Replication Tests Failed")
