@@ -21,7 +21,7 @@ class DBEngine:
 				except:
 					logging.critical("PORT is unavailable; Considering defaults")
 					self.extraction_settings["PORT"] = ""
-				
+
 				try:
 					self.extraction_settings["USER"]
 				except:
@@ -70,7 +70,7 @@ class DBEngine:
 				except:
 					logging.critical("PORT is unavailable; Considering defaults")
 					self.commit_settings["PORT"] = ""
-				
+
 				try:
 					self.commit_settings["USER"]
 				except:
@@ -106,14 +106,14 @@ class DBEngine:
 								dbname = self.commit_settings['DB'])
 				except:
 					logging.critical("Unable to connect to the Commit Database")
-				
+
 			if self.queue_settings["ENGINE"].upper() == 'REDIS':
 				try:
 					self.queue_settings["HOST"]
 				except:
 					logging.critical("QUEUE-HOST is unavailable; unable to proceed")
 					return {}, {}
-				
+
 				from redis import Redis
 
 				try:
@@ -131,7 +131,7 @@ class DBEngine:
 		except Exception as e:
 			return {"status": "Failed", "message": "Extraction Cursor Initiation Failed", "error": str(e)}
 			logging.critical("Extraction Cursor not Initiated")
-		
+
 		try:
 			com_cur = self.com_db.cursor()
 		except Exception as e:
@@ -139,11 +139,11 @@ class DBEngine:
 			logging.critical("Commit Cursor not Inititated")
 
 		return {"status": "Succeeded", "message": "Commit Cursor Initiation Succeeded"}
-	
+
 	def test_replication(self):
 		try:
 			instance = eval(self.extraction_settings["ENGINE"]+"_"+self.commit_settings["ENGINE"]+'(self.extraction_settings, self.commit_settings, self.queue_settings)')
 		except Exception as e:
 			return {"status": "Failed", "message": "Replication Initiation Failed", "error": str(e)}
 			logging.critical("Replication Tests Failed")
-			
+

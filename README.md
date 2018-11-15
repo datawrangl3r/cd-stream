@@ -28,6 +28,15 @@ expire_logs_days        = 10
 max_binlog_size         = 100M
 ```
 
+Make sure the user which you use in the extraction block, has the replication privileges.
+It can be enabled as:
+
+```sql
+mysql> CREATE USER 'repl'@'%.example.com' IDENTIFIED BY 'password';
+mysql> GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%.example.com';
+mysql> FLUSH PRIVILEGES:
+```
+
 ## All Set.. Time to Wrangle!!
 **Safety first - Put your hard hats on !**
 1. Clone the project and Initialize a virtual environment. 

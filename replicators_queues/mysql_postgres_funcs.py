@@ -3,9 +3,9 @@ from decimal import *
 import psycopg2 as pg2
 
 stop_words = {
-				" unsigned ": " ", 
-				" UNSIGNED ": " ", 
-				" datetime ": " timestamp ", 
+				" unsigned ": " ",
+				" UNSIGNED ": " ",
+				" datetime ": " timestamp ",
 				" DATETIME ": " TIMESTAMP "
 			}
 
