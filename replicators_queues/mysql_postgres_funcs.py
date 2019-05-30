@@ -3,20 +3,12 @@ from decimal import *
 import psycopg2 as pg2
 
 stop_words = {
-<<<<<<< HEAD
-    " unsigned ": " ",
-    " UNSIGNED ": " ",
-    " datetime ": " timestamp ",
-    " DATETIME ": " TIMESTAMP "
-}
 
-=======
 				" unsigned ": " ",
 				" UNSIGNED ": " ",
 				" datetime ": " timestamp ",
 				" DATETIME ": " TIMESTAMP "
 			}
->>>>>>> 941673cd6de7bd3120105c9ee0eae551d8989ac6
 
 def delete(commit_settings, tablename, value_dict):
     com_db = pg2.connect(
@@ -111,20 +103,6 @@ def create(commit_settings, query):
     com_db.close()
 
 def alter(commit_settings, query):
-<<<<<<< HEAD
-    com_db = pg2.connect(
-                        host 	 = commit_settings["HOST"],
-                        port 	 = commit_settings["PORT"],
-                        user 	 = commit_settings["USER"],
-                        password = commit_settings["PASS"],
-                        dbname	 = commit_settings['DB'])
-    for each_stop_word in stop_words:
-        query = re.sub(each_stop_word, stop_words[each_stop_word], query)
-    commit_cursor = com_db.cursor()
-    commit_cursor.execute(query)
-    com_db.commit()
-    com_db.close()
-=======
 	com_db = pg2.connect(
 						host 	 = commit_settings["HOST"],
 						port 	 = commit_settings["PORT"],
@@ -137,4 +115,3 @@ def alter(commit_settings, query):
 	commit_cursor.execute(query)
 	com_db.commit()
 	com_db.close()
->>>>>>> 941673cd6de7bd3120105c9ee0eae551d8989ac6
